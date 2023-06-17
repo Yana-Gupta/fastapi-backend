@@ -18,16 +18,30 @@ def get_db():
 
 @app.get("/")
 def read_root():
-    return f'Welcome to the Home Page!'
+    return "<h1>Welcome to the home page of this api</h1>"
+
+
+
+@app.get("/user/{email}")
+def get_user(email: str, db: Session = Depends(get_db)):
+    get_user = crud.get_user_by_email(db=db, email=email)
+    if get_user is not None:
+        return get_user
+    else:
+        return HTTPException(status_code=404, detail="User Not Found")
+
 
 
 @app.post("/user")
-def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
-    get_user = crud.get_user_by_email(db, user.email)
-    if get_user:
-        print(get_user)
-        raise HTTPException(status_code=400, detail="Email already registered")
-    return crud.create_user(db, user)
-    # print(user)
+def create_user( user: schema.UserCreate, db: Session = Depends(get_db)):
+    get_user = crud.get_user_by_email(db, email=user.email)
+    if get_user is not None:
+        return HTTPException(status_code=400, detail="Email already registered")
+    else:
+        return crud.create_user(db=db, user=user)
     
+
+@app.post("/diet")
+def create_new_diet( diet: schema.DietCreate, db: Session = Depends(get_db)):
+    return crud.create_diet(diet=diet, db=db)
 
