@@ -8,18 +8,21 @@ class Roles(str, Enum):
     user_manager = "user_manager"
 
 
-
 class UserBase(BaseModel):
-    name: str
     email: str
-    role: Roles
-    is_active: bool
-
+    password: str
 
 
 class UserCreate(UserBase):
-    password: str
+    role: Roles
+    name: str
+    daily_calories: int
 
+
+class UserUpdate(UserBase):
+    name: str
+    daily_calories: int
+    pass
 
 
 class DietBase(BaseModel):
@@ -27,11 +30,13 @@ class DietBase(BaseModel):
     description: str
     calories: int
 
-    
 
 class DietCreate(DietBase):
-    email: str
+    pass
     
+
+class DietUpdate(DietBase):
+    pass
 
 class Diet(DietBase):
     email: str
