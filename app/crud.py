@@ -5,6 +5,8 @@ from sqlalchemy import func
 from app.auth import jwt_handler
 from app.schema import Roles
 from app import model, schema, helper
+from fastapi.responses import JSONResponse
+
 
 def get_users(db: Session, jwt_token: str):
     cred = jwt_handler.decodeJWT(jwt_token)
@@ -27,20 +29,19 @@ def get_user_by_email(db: Session, email: str, jwt_token: str):
 def create_user(db: Session, user: schema.UserCreate):
     get_user = db.query(model.User).filter(model.User.email == user.email).first()
     if get_user is not None:
-        return HTTPException(status_code=400, detail="Email already registered")
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
     new_user = model.User(name=user.name, email=user.email, role=user.role, hashed_password=user.password, daily_calories=user.daily_calories)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return new_user
-
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content={"message": "User created successfully"})
 
 def auth_user(db: Session, user: schema.UserCreate):
     get_user = db.query(model.User).filter(model.User.email == user.email).first()
     if get_user is None:
-        return False
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     if get_user.hashed_password != user.password:
-        return False
+        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     user_role = get_user.role
     return jwt_handler.sign_JWT(user.email, user_role)
 
@@ -61,7 +62,7 @@ def create_diet(db: Session, diet: schema.DietCreate, jwt_token):
     cred = jwt_handler.decodeJWT(jwt_token)
 
     if cred is False:
-        return {"error": "Invalid token"}
+        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     
 
     user_email = cred["decoded_token"]["email"]
@@ -95,7 +96,7 @@ def create_diet(db: Session, diet: schema.DietCreate, jwt_token):
     db.add(new_diet)
     db.commit()
     db.refresh(new_diet)
-    return new_diet
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content={"message": "Diet created successfully"})  
 
 
 
@@ -105,7 +106,7 @@ def get_diets_for_user(db: Session, user: str, jwt_token: str):
         return {"error": "Invalid token"}
     if cred["decoded_token"]["email"] == user or cred["decoded_token"]["role"] == Roles.admin:
         return db.query(model.Diet).filter(model.Diet.email == user).all()
-    return { "error": "Invalid token"}
+    return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to view this user's diets")
 
 
 
