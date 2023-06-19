@@ -105,7 +105,8 @@ def get_diets_for_user(db: Session, user: str, jwt_token: str):
     if cred is False:
         return {"error": "Invalid token"}
     if cred["decoded_token"]["email"] == user or cred["decoded_token"]["role"] == Roles.admin:
-        return db.query(model.Diet).filter(model.Diet.email == user).all()
+        diets = db.query(model.Diet).filter(model.Diet.email == user).all()
+        return { "diets": diets}
     return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to view this user's diets")
 
 
@@ -176,6 +177,17 @@ def delete_diet(id: id, db: Session, jwt_token):
         "message": "Diet deleted successfully"
     }
 
+
 def get_calorie_amount_for_user(email: str, db: Session):
     return db.query(model.User).filter(model.User.email == email).first().daily_calories
 
+
+def get_all_diets(db: Session, jwt_token):
+    cred = jwt_handler.decodeJWT(jwt_token)
+    if cred is False:
+        return {"error": "Invalid token"}
+    
+    if cred["decoded_token"]["role"] != Roles.admin:
+        return { "error": "You are not authorized to view all diets"}
+    diets = db.query(model.Diet).all()
+    return { "diets": diets}

@@ -1,3 +1,4 @@
 uvicorn == 0.22.0
 fastapi == 0.97.0
 python-jose == 3.3.0
+sqlalchemy == 2.0.16

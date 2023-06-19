@@ -54,6 +54,10 @@ def update_user( user: schema.UserUpdate, db: Session = Depends(get_db), jwt_tok
 @app.post("/login")
 def auth (user: schema.UserBase, db: Session = Depends(get_db)):
     return crud.auth_user(db=db, user=user)
+
+@app.get("/diet")
+def get_diets( db: Session = Depends(get_db), jwt_token: HTTPAuthorizationCredentials = Depends(security)):
+    return crud.get_all_diets(db=db, jwt_token=jwt_token.credentials)
     
 
 @app.post("/diet")
