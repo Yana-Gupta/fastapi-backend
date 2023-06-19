@@ -2,7 +2,6 @@
 
 [FASTAPI](https://fastapi.tiangolo.com/)
 
-
 ## How to run the project 
 
 Install all teh dependencies module 
@@ -34,6 +33,7 @@ pytest app/test.py
 pytest --capture=no  app/test.py
 ```
 **NOTE**: Change the TEST_EMAIL in `test.py` in `app` directory after running the test once.
+**NOTE**: All the test scripts are present in `app` directory  `test.py` module.
 
 
 ## Endpoints Created 
@@ -42,13 +42,15 @@ pytest --capture=no  app/test.py
 - POST '/user' to create a user 
 - GET '/user/{email}' only accessible to that user, admin or user manager
 - POST '/login' return jwt 
-- POST '/diet'creates a new diet 
+- POST '/diet'creates a new diet, the calories of the food will be checked by its description, not by name of the food_item
 - GET '/user' returns the list of all the user, only accessible to admin or user manager
 - PUT '/user' updates the user information, only accessible to admin or user, or user manager
 - GET '/diet/{email}' returns the list of all the diets of a user, only accessible to user or admin
 - GET '/diet' return the list of all the diets, only accessible to the admin
 - GET 'diet/{id}' only accessible to the user if the diet is his otherwise user can not access the information, admin can access the route
 - DELETE 'diet/{id}' only accessible to the user if that diet is his otherwise can not access, admin can access the route
+
+**NOTE**: Once you login, you will be given a access token that you have to copy to access resources of prohibited routes as per your role
 
 
 
@@ -59,9 +61,10 @@ pytest --capture=no  app/test.py
 1) User - The user can create, read, update and delete the diet created by him
 2) User Manager - The user manager can view all the routes associated with the user , e.g. GET all the users, access a particular user by email
 3) Admin - Admin has access to all the routes including which user and user manager don't have access.
+**NOTE**: Admin can update and delete the diet information of a particular user, but can not create one on behalf of that user
 
 
-### Third api from where information is accessed.
+### Third api form where the calories information about food is accessed
 [FoodData Central](https://fdc.nal.usda.gov/)
 
 NOTE: Assumption: at initial the food_calories will be 0, if user inputs the food_calories himself, then data will not be fetched from the api otherwise data is fetched, and if user has entered any such meal for which data doesn't exits, then the food_calories will be set to 0.
