@@ -1,15 +1,15 @@
-from typing import Union
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
-from database import SessionLocal, engine
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-import helper
 
-import model, schema, crud
+from app.database import SessionLocal, engine
+from app import model
+from app import schema
+from app import crud
+app = FastAPI()
 
 model.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
 security = HTTPBearer()
 
 
@@ -19,6 +19,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 
 
 @app.get("/")
@@ -35,7 +36,7 @@ def get_users( db: Session = Depends(get_db), jwt_token: HTTPAuthorizationCreden
 def get_user(email: str, db: Session = Depends(get_db), jwt_token: HTTPAuthorizationCredentials = Depends(security)):
     get_user = crud.get_user_by_email(db=db, email=email, jwt_token=jwt_token.credentials)
     if get_user is not None:
-        return get_user
+        return crud.get_user
     else:
         return HTTPException(status_code=404, detail="User Not Found")
 
@@ -68,3 +69,8 @@ def get_diets_for_user(email: str, db: Session = Depends(get_db), jwt_token: HTT
 @app.put("/diet/{id}")
 def update_diet(id: int, diet: schema.DietUpdate, db: Session = Depends(get_db), jwt_token: HTTPAuthorizationCredentials = Depends(security)):
     return crud.update_diet(db=db, id=id, diet=diet, jwt_token=jwt_token.credentials)
+
+
+@app.delete("/diet/{id}")
+def delete_diet(id: int, db: Session = Depends(get_db), jwt_token: HTTPAuthorizationCredentials = Depends(security)):
+    return crud.delete_diet(db=db, id=id, jwt_token=jwt_token.credentials)

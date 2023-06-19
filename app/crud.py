@@ -1,15 +1,10 @@
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
-import model, schema
 from datetime import date
 from sqlalchemy import func
-
-from auth import jwt_handler
-
-from schema import Roles
-
-import helper
-
+from app.auth import jwt_handler
+from app.schema import Roles
+from app import model, schema, helper
 
 def get_users(db: Session, jwt_token: str):
     cred = jwt_handler.decodeJWT(jwt_token)
@@ -159,5 +154,27 @@ def update_diet(id: id,db: Session, diet: schema.DietUpdate, jwt_token):
     return db.get(model.Diet, id)
 
 
+def delete_diet(id: id, db: Session, jwt_token):
+    cred = jwt_handler.decodeJWT(jwt_token)
+    if cred is False:
+        return {"error": "Invalid token"}
+    
+    user_email = cred["decoded_token"]["email"]
+
+    that_diet = db.get(model.Diet, id)
+
+    if that_diet is None:
+        return { "error": "Invalid diet id"}
+
+    if cred["decoded_token"]["role"] != Roles.admin and that_diet.email != user_email:
+        return { "error": "You are not authorized to delete this diet"}
+  
+    db.delete(that_diet)
+    db.commit()
+    return { 
+        "message": "Diet deleted successfully"
+    }
+
 def get_calorie_amount_for_user(email: str, db: Session):
     return db.query(model.User).filter(model.User.email == email).first().daily_calories
+

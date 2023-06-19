@@ -1,9 +1,7 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Enum, DateTime
 from datetime import datetime, date
-from database import Base
-
-from schema import Roles
-
+from app.database import Base
+from app.schema import Roles
 
 class User(Base):
     __tablename__ = "users"

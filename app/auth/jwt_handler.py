@@ -1,6 +1,6 @@
 from fastapi import FastAPI, status, HTTPException
-import jwt
 from datetime import datetime, timedelta
+from jose import jwt
 
 JWT_SECRET = "TVlfSldUX1NFQ0VUCg"
 JWT_ALGORITHM = "HS256"
