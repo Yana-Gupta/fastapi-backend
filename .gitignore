@@ -1,2 +1,9 @@
 
 query.http
+
+env
+
+
+## python
+__pycache__/
+
